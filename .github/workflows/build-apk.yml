@@ -15,7 +15,7 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Create google-services.json
+      - name: Create google-services.json securely
         env:
           GOOGLE_SERVICES_JSON: ${{ secrets.GOOGLE_SERVICES_JSON }}
         run: |
@@ -31,7 +31,7 @@ jobs:
       - name: Install dependencies
         run: flutter pub get
 
-      - name: Create Android Gradle wrapper
+      - name: Create modern Gradle wrapper
         run: |
           mkdir -p android/gradle/wrapper
 
@@ -42,6 +42,24 @@ jobs:
           zipStorePath=wrapper/dists
           distributionUrl=https\://services.gradle.org/distributions/gradle-8.14-bin.zip
           EOF
+
+      - name: Upgrade Android Gradle Plugin
+        run: |
+          echo "Current Android configuration:"
+          find android -maxdepth 2 -type f \( -name "settings.gradle" -o -name "settings.gradle.kts" -o -name "build.gradle" -o -name "build.gradle.kts" \) -print
+
+          find android -type f \( -name "settings.gradle" -o -name "settings.gradle.kts" -o -name "build.gradle" -o -name "build.gradle.kts" \) -exec sed -i \
+            -e 's/id("com\.android\.application") version "8\.9\.1"/id("com.android.application") version "8.11.1"/g' \
+            -e 's/id '\''com\.android\.application'\'' version '\''8\.9\.1'\''/id '\''com.android.application'\'' version '\''8.11.1'\''/g' \
+            -e 's/com\.android\.tools\.build:gradle:8\.9\.1/com.android.tools.build:gradle:8.11.1/g' \
+            {} +
+
+      - name: Show final Gradle versions
+        run: |
+          grep -R "8.11.1\|8.9.1\|com.android.application" android \
+            --include="*.gradle" \
+            --include="*.gradle.kts" \
+            || true
 
       - name: Build debug APK
         run: flutter build apk --debug
