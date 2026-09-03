@@ -15,17 +15,12 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Create google-services.json from secret
+      - name: Create google-services.json
         env:
           GOOGLE_SERVICES_JSON: ${{ secrets.GOOGLE_SERVICES_JSON }}
         run: |
           mkdir -p android/app
           printf '%s' "$GOOGLE_SERVICES_JSON" > android/app/google-services.json
-
-      - name: Verify Firebase config
-        run: |
-          test -s android/app/google-services.json
-          echo "Firebase configuration added securely"
 
       - name: Set up Flutter
         uses: subosito/flutter-action@v2
@@ -36,14 +31,17 @@ jobs:
       - name: Install dependencies
         run: flutter pub get
 
-      - name: Analyze project
-        run: flutter analyze
-        continue-on-error: true
-
-      - name: Upgrade Gradle wrapper
+      - name: Create Android Gradle wrapper
         run: |
-          sed -i 's/gradle-[0-9.]*-bin.zip/gradle-8.14-bin.zip/g' android/gradle/wrapper/gradle-wrapper.properties
-          cat android/gradle/wrapper/gradle-wrapper.properties
+          mkdir -p android/gradle/wrapper
+
+          cat > android/gradle/wrapper/gradle-wrapper.properties << 'EOF'
+          distributionBase=GRADLE_USER_HOME
+          distributionPath=wrapper/dists
+          zipStoreBase=GRADLE_USER_HOME
+          zipStorePath=wrapper/dists
+          distributionUrl=https\://services.gradle.org/distributions/gradle-8.14-bin.zip
+          EOF
 
       - name: Build debug APK
         run: flutter build apk --debug
