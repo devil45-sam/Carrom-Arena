@@ -1,0 +1,33 @@
+name: Extract Carrom Arena Project
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  extract:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Extract project ZIP
+        run: |
+          unzip -o Carrom_Arena_Corrected_Structure.zip
+          if [ -d "Carrom_Arena_Corrected" ]; then
+            shopt -s dotglob
+            mv Carrom_Arena_Corrected/* .
+            rmdir Carrom_Arena_Corrected
+          fi
+          rm Carrom_Arena_Corrected_Structure.zip
+
+      - name: Commit extracted files
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add .
+          git commit -m "Extract Carrom Arena project" || echo "No changes to commit"
+          git push
