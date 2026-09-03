@@ -1,0 +1,13 @@
+CARROM ARENA PROJECT - CORRECT FOLDER STRUCTURE
+
+This folder must remain as folders. Do not move individual files out.
+
+Carrom_Arena_Corrected/
+├── lib/
+├── android/
+│   └── app/
+│       └── google-services.json  <- PUT FIREBASE FILE HERE
+├── server/
+├── firebase/
+├── assets/
+└── pubspec.yaml
